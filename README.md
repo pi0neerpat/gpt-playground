@@ -30,11 +30,13 @@ cd gpt-playground
 npm i
 ```
 
-Create a file called `.env` and paste this content with the api key
+Create a file called `.env` 
 
+```bash
+echo PAPERSPACE_API_KEY= > .env
 ```
-PAPERSPACE_API_KEY=
-```
+
+Then edit the file with text editor, and paste in the API key after the "=" and save it.
 
 ## Usage 
 
