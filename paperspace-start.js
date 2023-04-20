@@ -31,7 +31,7 @@ async function execWaitForOutput(command, execOptions = {}) {
 const onMachineStart = async (machine) => {
     rl.question(`Do you want to start Auto-GPT? (y/n): `, (answer) => {
         if (answer === 'y') {
-            console.log(`*****************\nRun these commands:\n\nssh paperspace@${machine.publicIpAddress}\ncd Auto-GPT\npython3 scripts/main.py\n\n********************`)
+            console.log(`*****************\nRun these commands:\n\nssh -t paperspace@${machine.publicIpAddress} "cd Auto-GPT ; bash --login"\n./run.sh\n\n********************`)
             execWaitForOutput(`code --remote ssh-remote+paperspace@${machine.publicIpAddress} /home/paperspace/`)
         } else if (answer === 'n') {
             console.log(`Connect to Stable Diffusion with: ssh -L 127.0.0.1:3001:127.0.0.1:3001 paperspace@${machine.publicIpAddress}`);
@@ -78,8 +78,9 @@ const useMachine = (machine) => {
 }
 
 const selectMachine = () => paperspace.machines.list(function (err, res) {
-    console.log(res.map(m => `${m.id} "${m.name}" (${m.state}) ${m.gpu} GPU, ${m.cpus} CPUs, ${Math.floor(Number(m.ram) / 1000000000)} GB ram`))
-    rl.question(`Which machine would you like to use? Machine ID: `, (answer) => {
+    console.log(`***************\nMachines: ${res.length}\n***************`)
+    console.log(res.map(m => `${m.id} "${m.name}"(${m.state}) ${m.gpu} GPU, ${m.cpus} CPUs, ${Math.floor(Number(m.ram) / 1000000000)} GB ram`))
+    rl.question(`Which machine would you like to use ? Machine ID: `, (answer) => {
         machine = res.find(m => m.id === answer);
         if (machine) {
             return useMachine(machine)
