@@ -34,8 +34,9 @@ const onMachineStart = async (machine) => {
             console.log(`*****************\nRun these commands:\n\nssh -t paperspace@${machine.publicIpAddress} "cd Auto-GPT ; bash --login"\n./run.sh\n\n********************`)
             execWaitForOutput(`code --remote ssh-remote+paperspace@${machine.publicIpAddress} /home/paperspace/`)
         } else if (answer === 'n') {
-            console.log(`Connect to Stable Diffusion with: ssh -L 127.0.0.1:3001:127.0.0.1:3001 paperspace@${machine.publicIpAddress}`);
-            execWaitForOutput(`code --remote ssh-remote+paperspace@${machine.publicIpAddress} /home/paperspace/`)
+            console.log(`\n=================\nStable Diffusion commands\n==================\n\nssh -L 127.0.0.1:7860:127.0.0.1:7860 paperspace@${machine.publicIpAddress}`);
+            console.log(`cd stable-diffusion-webui && ./webui.sh --no-half\n`);
+            console.log(`Then open http://localhost:7860 in your browser\n`);
         } else {
             console.log('Invalid input. Please enter "y" or "n".');
         }
@@ -71,16 +72,21 @@ const useMachine = (machine) => {
             if (err) {
                 console.log(err.response.error.text)
             }
-            console.log(`Starting machine. Retry in 10 seconds.`);
+            console.log(`Try again in 30 seconds.`);
             rl.close();
         });
     }
 }
 
 const selectMachine = () => paperspace.machines.list(function (err, res) {
-    console.log(`***************\nMachines: ${res.length}\n***************`)
-    console.log(res.map(m => `${m.id} "${m.name}"(${m.state}) ${m.gpu} GPU, ${m.cpus} CPUs, ${Math.floor(Number(m.ram) / 1000000000)} GB ram`))
-    rl.question(`Which machine would you like to use ? Machine ID: `, (answer) => {
+    if (err) {
+        return console.log(err.response.error)
+        rl.close();
+    }
+    console.log(`\n***************\nMachines: ${res.length}\n***************`)
+    res.map(m => console.log(`${m.id} - Status ${m.state} | "${m.name}" | GPU ${m.gpu} | CPUS ${m.cpus} | RAM ${Math.floor(Number(m.ram) / 1000000000)}GB`))
+    console.log("***************\n")
+    rl.question(`Enter Machine ID: `, (answer) => {
         machine = res.find(m => m.id === answer);
         if (machine) {
             return useMachine(machine)
